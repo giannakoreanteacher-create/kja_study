@@ -6,7 +6,19 @@
     { key: 'C', label: '3단계' },
   ];
   const DAILY_CAP = 30;
-  const storage = window.localStorage;
+  const storage = (() => {
+    try {
+      window.localStorage.setItem('__kja_probe', '1');
+      window.localStorage.removeItem('__kja_probe');
+      return window.localStorage;
+    } catch {
+      const mem = {};
+      return {
+        getItem: (k) => (k in mem ? mem[k] : null),
+        setItem: (k, v) => { mem[k] = String(v); },
+      };
+    }
+  })();
 
   const wordsByLevel = { A: [], B: [], C: [] };
   WORDS.forEach((w) => wordsByLevel[w.level].push(w));
@@ -148,24 +160,6 @@
   }
 
   // --- wiring ---
-  const cardSwipeFlag = { value: false };
-  const reviewCardSwipeFlag = { value: false };
-
-  document.getElementById('card').addEventListener('click', () => {
-    if (cardSwipeFlag.value) {
-      cardSwipeFlag.value = false;
-      return;
-    }
-    document.getElementById('card').classList.toggle('flipped');
-  });
-  document.getElementById('review-card').addEventListener('click', () => {
-    if (reviewCardSwipeFlag.value) {
-      reviewCardSwipeFlag.value = false;
-      return;
-    }
-    document.getElementById('review-card').classList.toggle('flipped');
-  });
-
   document.getElementById('swipe-know').addEventListener('click', () => answerCurrent(true));
   document.getElementById('swipe-dont-know').addEventListener('click', () => answerCurrent(false));
   document.getElementById('review-swipe-know').addEventListener('click', () => answerReviewCurrent(true));
@@ -176,28 +170,32 @@
   document.getElementById('complete-home-btn').addEventListener('click', renderHome);
   document.getElementById('complete-review-btn').addEventListener('click', () => startReview(currentLevel));
 
-  // --- drag-to-swipe (pointer events cover mouse + touch) ---
-  function enableDragSwipe(cardId, onKnow, onDontKnow, flagRef) {
+  // --- tap-to-flip + drag-to-swipe, unified (pointer events cover mouse + touch) ---
+  function enableSwipeCard(cardId, onKnow, onDontKnow) {
     const card = document.getElementById(cardId);
     let startX = null;
 
-    card.addEventListener('pointerdown', (e) => { startX = e.clientX; });
+    card.addEventListener('pointerdown', (e) => {
+      startX = e.clientX;
+      card.setPointerCapture(e.pointerId);
+    });
+
     card.addEventListener('pointerup', (e) => {
       if (startX === null) return;
       const dx = e.clientX - startX;
       startX = null;
-      if (!card.classList.contains('flipped')) return; // only swipe after seeing the back
-      if (dx > 80) {
-        flagRef.value = true;
-        onKnow();
-      } else if (dx < -80) {
-        flagRef.value = true;
-        onDontKnow();
+
+      if (Math.abs(dx) <= 80) {
+        card.classList.toggle('flipped'); // treat as a tap: flip the card
+        return;
       }
+      if (!card.classList.contains('flipped')) return; // only swipe-answer after seeing the back
+      if (dx > 0) onKnow();
+      else onDontKnow();
     });
   }
-  enableDragSwipe('card', () => answerCurrent(true), () => answerCurrent(false), cardSwipeFlag);
-  enableDragSwipe('review-card', () => answerReviewCurrent(true), () => answerReviewCurrent(false), reviewCardSwipeFlag);
+  enableSwipeCard('card', () => answerCurrent(true), () => answerCurrent(false));
+  enableSwipeCard('review-card', () => answerReviewCurrent(true), () => answerReviewCurrent(false));
 
   renderHome();
 })();

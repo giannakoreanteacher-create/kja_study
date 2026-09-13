@@ -19,4 +19,3 @@ npm start
 4. Start Command: `npm start`
 5. Render가 자동으로 `PORT` 환경변수를 주입하며, `server.js`가 이를 사용하도록 되어 있음
 6. 무료 티어는 일정 시간 무활동 시 슬립되어 첫 요청 시 기동에 시간이 걸릴 수 있음
-```
