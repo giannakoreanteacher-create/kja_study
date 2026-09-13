@@ -139,7 +139,8 @@
     reviewIndex += 1;
     if (reviewIndex >= reviewQueue.length) {
       document.getElementById('complete-message').textContent = '복습 완료!';
-      document.getElementById('complete-review-btn').hidden = true;
+      const finalState = loadState(storage, currentLevel);
+      document.getElementById('complete-review-btn').hidden = finalState.wrongIds.length === 0;
       show('screen-complete');
       return;
     }
@@ -147,10 +148,21 @@
   }
 
   // --- wiring ---
+  const cardSwipeFlag = { value: false };
+  const reviewCardSwipeFlag = { value: false };
+
   document.getElementById('card').addEventListener('click', () => {
+    if (cardSwipeFlag.value) {
+      cardSwipeFlag.value = false;
+      return;
+    }
     document.getElementById('card').classList.toggle('flipped');
   });
   document.getElementById('review-card').addEventListener('click', () => {
+    if (reviewCardSwipeFlag.value) {
+      reviewCardSwipeFlag.value = false;
+      return;
+    }
     document.getElementById('review-card').classList.toggle('flipped');
   });
 
@@ -165,7 +177,7 @@
   document.getElementById('complete-review-btn').addEventListener('click', () => startReview(currentLevel));
 
   // --- drag-to-swipe (pointer events cover mouse + touch) ---
-  function enableDragSwipe(cardId, onKnow, onDontKnow) {
+  function enableDragSwipe(cardId, onKnow, onDontKnow, flagRef) {
     const card = document.getElementById(cardId);
     let startX = null;
 
@@ -175,12 +187,17 @@
       const dx = e.clientX - startX;
       startX = null;
       if (!card.classList.contains('flipped')) return; // only swipe after seeing the back
-      if (dx > 80) onKnow();
-      else if (dx < -80) onDontKnow();
+      if (dx > 80) {
+        flagRef.value = true;
+        onKnow();
+      } else if (dx < -80) {
+        flagRef.value = true;
+        onDontKnow();
+      }
     });
   }
-  enableDragSwipe('card', () => answerCurrent(true), () => answerCurrent(false));
-  enableDragSwipe('review-card', () => answerReviewCurrent(true), () => answerReviewCurrent(false));
+  enableDragSwipe('card', () => answerCurrent(true), () => answerCurrent(false), cardSwipeFlag);
+  enableDragSwipe('review-card', () => answerReviewCurrent(true), () => answerReviewCurrent(false), reviewCardSwipeFlag);
 
   renderHome();
 })();
