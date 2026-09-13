@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>한국어 단어 카드</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <section id="screen-home" class="screen">
+      <h1>한국어 단어 카드</h1>
+      <div id="level-list" class="level-list"></div>
+    </section>
+
+    <section id="screen-study" class="screen" hidden>
+      <button class="back-btn" id="study-back-btn">← 홈</button>
+      <div class="card-stage">
+        <div id="card" class="card">
+          <div class="card-face card-front">
+            <p id="card-front-pos" class="card-pos"></p>
+            <p id="card-front-word" class="card-word"></p>
+          </div>
+          <div class="card-face card-back">
+            <p id="card-back-meaning" class="card-meaning"></p>
+          </div>
+        </div>
+      </div>
+      <div class="swipe-row">
+        <button id="swipe-dont-know" class="swipe-btn dont-know">← 모름</button>
+        <button id="swipe-know" class="swipe-btn know">안다 →</button>
+      </div>
+    </section>
+
+    <section id="screen-complete" class="screen" hidden>
+      <p id="complete-message" class="complete-message"></p>
+      <div class="complete-actions">
+        <button id="complete-review-btn" class="primary-btn" hidden>복습하기</button>
+        <button id="complete-home-btn" class="primary-btn">홈으로</button>
+      </div>
+    </section>
+
+    <section id="screen-review" class="screen" hidden>
+      <button class="back-btn" id="review-back-btn">← 홈</button>
+      <div class="card-stage">
+        <div id="review-card" class="card">
+          <div class="card-face card-front">
+            <p id="review-card-front-pos" class="card-pos"></p>
+            <p id="review-card-front-word" class="card-word"></p>
+          </div>
+          <div class="card-face card-back">
+            <p id="review-card-back-meaning" class="card-meaning"></p>
+          </div>
+        </div>
+      </div>
+      <div class="swipe-row">
+        <button id="review-swipe-dont-know" class="swipe-btn dont-know">← 모름</button>
+        <button id="review-swipe-know" class="swipe-btn know">안다 →</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="words.js"></script>
+  <script src="progress.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

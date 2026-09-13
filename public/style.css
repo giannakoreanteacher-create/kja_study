@@ -1,0 +1,157 @@
+:root {
+  --pink: #ff8fab;
+  --pink-light: #ffe3ec;
+  --ink: #2b2b2b;
+  --paper: #fffdfb;
+  --shadow: 0 8px 24px rgba(255, 143, 171, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+  min-height: 100vh;
+}
+
+.screen[hidden] { display: none; }
+
+h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.level-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.level-card {
+  background: white;
+  border-radius: 24px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.level-card .level-title { font-size: 18px; font-weight: 700; }
+.level-card .level-progress { font-size: 13px; color: #8a8a8a; margin-top: 6px; }
+
+.review-btn {
+  margin-top: 10px;
+  display: inline-block;
+  background: var(--pink-light);
+  color: #c2185b;
+  border: none;
+  border-radius: 16px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #8a8a8a;
+  font-size: 14px;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.card-stage {
+  display: flex;
+  justify-content: center;
+  margin: 40px 0;
+  perspective: 1200px;
+}
+
+.card {
+  width: 100%;
+  max-width: 320px;
+  height: 400px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.35s ease;
+  cursor: pointer;
+}
+
+.card.flipped { transform: rotateY(180deg); }
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  background: white;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  backface-visibility: hidden;
+  text-align: center;
+}
+
+.card-back { transform: rotateY(180deg); background: var(--pink-light); }
+
+.card-pos { font-size: 13px; color: #c2185b; margin-bottom: 12px; }
+.card-word { font-size: 30px; font-weight: 700; }
+.card-meaning { font-size: 20px; font-weight: 600; line-height: 1.5; }
+
+.swipe-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.swipe-btn {
+  border: none;
+  border-radius: 18px;
+  padding: 14px 22px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.swipe-btn.dont-know { background: #f0f0f0; color: #666; }
+.swipe-btn.know { background: var(--pink); color: white; }
+
+.complete-message {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  margin: 60px 0 24px;
+}
+
+.complete-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.primary-btn {
+  background: var(--pink);
+  color: white;
+  border: none;
+  border-radius: 18px;
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  max-width: 280px;
+}
