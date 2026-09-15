@@ -63,13 +63,27 @@
     document.getElementById('home-date').textContent = `${MONTH_NAMES[Number(m) - 1]} ${Number(d)}, ${y}`;
   }
 
+  function totalWrongCount() {
+    return LEVELS.reduce((sum, { key }) => sum + loadState(storage, key).wrongIds.length, 0);
+  }
+
+  function renderReviewAllSection() {
+    const section = document.getElementById('review-all-section');
+    const count = totalWrongCount();
+    if (count === 0) {
+      section.innerHTML = '';
+      return;
+    }
+    section.innerHTML = `<button id="review-all-btn" class="review-all-card">📚 Review All (${count})</button>`;
+    document.getElementById('review-all-btn').addEventListener('click', startReview);
+  }
+
   function renderHome() {
     renderHomeDate();
     const list = document.getElementById('level-list');
     list.innerHTML = '';
     LEVELS.forEach(({ key, label, illustration }) => {
       const state = loadState(storage, key);
-      const wrongCount = state.wrongIds.length;
       const total = wordsByLevel[key].length;
 
       const btn = document.createElement('button');
@@ -79,22 +93,11 @@
         <div class="level-title">${label}</div>
         <div class="level-progress">${state.todayCount}/${DAILY_CAP} today</div>
         <div class="level-total">${pad4(state.seenIds.length)}/${pad4(total)}</div>
-        ${wrongCount > 0 ? `<button class="review-btn" data-level="${key}">Review (${wrongCount})</button>` : ''}
       `;
-      btn.addEventListener('click', (e) => {
-        if (e.target.classList.contains('review-btn')) return; // handled below
-        startStudy(key);
-      });
+      btn.addEventListener('click', () => startStudy(key));
       list.appendChild(btn);
-
-      const reviewBtn = btn.querySelector('.review-btn');
-      if (reviewBtn) {
-        reviewBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          startReview(key);
-        });
-      }
     });
+    renderReviewAllSection();
     show('screen-home');
   }
 
@@ -147,18 +150,20 @@
   function showComplete(levelKey, message) {
     currentLevel = levelKey;
     document.getElementById('complete-message').textContent = message;
-    const state = loadState(storage, levelKey);
     const reviewBtn = document.getElementById('complete-review-btn');
-    reviewBtn.hidden = state.wrongIds.length === 0;
+    reviewBtn.hidden = totalWrongCount() === 0;
     show('screen-complete');
   }
 
-  // --- review: gallery of flip-cards, each with its own Know/Don't Know buttons ---
-  function startReview(levelKey) {
-    currentLevel = levelKey;
-    const state = loadState(storage, levelKey);
-    const wrongSet = new Set(state.wrongIds);
-    reviewQueue = wordsByLevel[levelKey].filter((w) => wrongSet.has(w.id));
+  // --- review: gallery of flip-cards, each with its own Know/Don't Know buttons.
+  // Pooled across all levels (not scoped to one level) ---
+  function startReview() {
+    reviewQueue = [];
+    LEVELS.forEach(({ key }) => {
+      const state = loadState(storage, key);
+      const wrongSet = new Set(state.wrongIds);
+      reviewQueue.push(...wordsByLevel[key].filter((w) => wrongSet.has(w.id)));
+    });
     if (reviewQueue.length === 0) {
       renderHome();
       return;
@@ -204,24 +209,24 @@
 
     item.querySelector('.mini-btn.know').addEventListener('click', (e) => {
       e.stopPropagation();
-      answerReviewItem(word.id, true, item);
+      answerReviewItem(word, true, item);
     });
     item.querySelector('.mini-btn.dont-know').addEventListener('click', (e) => {
       e.stopPropagation();
-      answerReviewItem(word.id, false, item);
+      answerReviewItem(word, false, item);
     });
 
     return item;
   }
 
-  function answerReviewItem(wordId, knows, itemEl) {
-    let state = loadState(storage, currentLevel);
-    state = recordAnswer(state, wordId, knows);
-    saveState(storage, currentLevel, state);
+  function answerReviewItem(word, knows, itemEl) {
+    let state = loadState(storage, word.level);
+    state = recordAnswer(state, word.id, knows);
+    saveState(storage, word.level, state);
 
     if (!knows) return; // stays in the gallery, still in wrongIds
 
-    reviewQueue = reviewQueue.filter((w) => w.id !== wordId);
+    reviewQueue = reviewQueue.filter((w) => w.id !== word.id);
     itemEl.remove();
     if (reviewQueue.length === 0) {
       document.getElementById('complete-message').textContent = 'Review complete!';
@@ -237,7 +242,7 @@
   document.getElementById('study-back-btn').addEventListener('click', renderHome);
   document.getElementById('review-back-btn').addEventListener('click', renderHome);
   document.getElementById('complete-home-btn').addEventListener('click', renderHome);
-  document.getElementById('complete-review-btn').addEventListener('click', () => startReview(currentLevel));
+  document.getElementById('complete-review-btn').addEventListener('click', () => startReview());
 
   // --- tap-to-flip + drag-to-swipe, unified (pointer events cover mouse + touch) ---
   function enableSwipeCard(cardId, onKnow, onDontKnow) {
