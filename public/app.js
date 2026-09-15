@@ -47,7 +47,7 @@
   let queue = [];
   let queueIndex = 0;
   let sessionStartCount = 0;
-  let sessionResults = [];
+  const sessionResultsByLevel = { A: [], B: [], C: [] };
   let reviewQueue = [];
 
   function show(screenId) {
@@ -67,10 +67,18 @@
     return LEVELS.reduce((sum, { key }) => sum + loadState(storage, key).wrongIds.length, 0);
   }
 
+  function todayWordCount() {
+    return LEVELS.reduce((sum, { key }) => sum + sessionResultsByLevel[key].length, 0);
+  }
+
   function renderSiteNav(activeLevel) {
     const container = document.getElementById('site-nav');
     const count = totalWrongCount();
+    const todayCount = todayWordCount();
     let html = `<button class="nav-btn" data-action="home">🏠 Home</button>`;
+    if (todayCount > 0) {
+      html += `<button class="nav-btn" data-action="today">📝 Today's Words (${todayCount})</button>`;
+    }
     html += `<button class="nav-btn review-nav-btn" data-action="review">📚 Review${count > 0 ? ` (${count})` : ''}</button>`;
     LEVELS.forEach(({ key, label }) => {
       const active = key === activeLevel ? ' active' : '';
@@ -82,10 +90,21 @@
       btn.addEventListener('click', () => {
         const action = btn.dataset.action;
         if (action === 'home') renderHome();
+        else if (action === 'today') showTodaySummary();
         else if (action === 'review') startReview();
         else if (action === 'level') startStudy(btn.dataset.level);
       });
     });
+  }
+
+  function showTodaySummary() {
+    const all = LEVELS.flatMap(({ key }) => sessionResultsByLevel[key]);
+    document.getElementById('complete-message').textContent = "Today's words";
+    renderSessionSummary(all);
+    document.getElementById('complete-more-btn').hidden = true;
+    document.getElementById('complete-review-btn').hidden = totalWrongCount() === 0;
+    renderSiteNav(null);
+    show('screen-complete');
   }
 
   function renderHome() {
@@ -118,11 +137,10 @@
     queue = buildQueue(wordsByLevel[levelKey], state, cap);
     queueIndex = 0;
     sessionStartCount = state.todayCount;
-    sessionResults = [];
     if (queue.length === 0) {
       showComplete(levelKey, allWordsSeen(levelKey, state)
         ? "You've learned every word in this level! 🎉"
-        : "You've reached today's limit of 30 words!", []);
+        : "You've reached today's limit of 30 words!", sessionResultsByLevel[levelKey]);
       return;
     }
     renderSiteNav(levelKey);
@@ -157,14 +175,14 @@
     let state = loadState(storage, currentLevel);
     state = recordAnswer(state, word.id, knows);
     saveState(storage, currentLevel, state);
-    sessionResults.push({ word, knows });
+    sessionResultsByLevel[currentLevel].push({ word, knows });
 
     queueIndex += 1;
     if (queueIndex >= queue.length) {
       const finalState = loadState(storage, currentLevel);
       showComplete(currentLevel, allWordsSeen(currentLevel, finalState)
         ? "You've learned every word in this level! 🎉"
-        : "You've finished today's study session!", sessionResults);
+        : "You've finished today's study session!", sessionResultsByLevel[currentLevel]);
       return;
     }
     renderStudyCard();
