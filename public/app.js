@@ -1,9 +1,9 @@
 // public/app.js
 (function () {
   const LEVELS = [
-    { key: 'A', label: 'Level 1', illustration: '🌱', cefr: 'Beginner · approx. CEFR A1–A2' },
-    { key: 'B', label: 'Level 2', illustration: '🌿', cefr: 'Intermediate · approx. CEFR B1–B2' },
-    { key: 'C', label: 'Level 3', illustration: '🌳', cefr: 'Advanced · approx. CEFR C1–C2' },
+    { key: 'A', label: 'Level 1', illustration: '🌱', cefr: 'Beginner · CEFR A1–A2' },
+    { key: 'B', label: 'Level 2', illustration: '🌿', cefr: 'Intermediate · CEFR B1–B2' },
+    { key: 'C', label: 'Level 3', illustration: '🌳', cefr: 'Advanced · CEFR C1–C2' },
   ];
   const DAILY_CAP = 30;
   const POS_LABELS = {
