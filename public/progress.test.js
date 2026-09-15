@@ -30,14 +30,16 @@ test('loadState returns default state when nothing stored', () => {
   assert.deepStrictEqual(state, defaultState());
 });
 
-test('loadState resets todayCount on a new day, keeps seen/wrong', () => {
+test('loadState resets todayCount and todayWords on a new day, keeps seen/wrong', () => {
   const storage = fakeStorage({
     kja_progress_A: JSON.stringify({
       seenIds: [1, 2], wrongIds: [2], today: '2000-01-01', todayCount: 30,
+      todayWords: [{ id: 1, knows: true }],
     }),
   });
   const state = loadState(storage, 'A');
   assert.strictEqual(state.todayCount, 0);
+  assert.deepStrictEqual(state.todayWords, []);
   assert.deepStrictEqual(state.seenIds, [1, 2]);
   assert.deepStrictEqual(state.wrongIds, [2]);
   assert.notStrictEqual(state.today, '2000-01-01');
@@ -45,10 +47,20 @@ test('loadState resets todayCount on a new day, keeps seen/wrong', () => {
 
 test('saveState persists and loadState reads it back (same day)', () => {
   const storage = fakeStorage();
-  const state = { seenIds: [5], wrongIds: [], today: todayString(), todayCount: 1 };
+  const state = { seenIds: [5], wrongIds: [], today: todayString(), todayCount: 1, todayWords: [{ id: 5, knows: true }] };
   saveState(storage, 'B', state);
   const loaded = loadState(storage, 'B');
   assert.deepStrictEqual(loaded, state);
+});
+
+test('loadState defaults todayWords to [] for data saved before this field existed', () => {
+  const storage = fakeStorage({
+    kja_progress_A: JSON.stringify({
+      seenIds: [1], wrongIds: [], today: todayString(), todayCount: 1,
+    }),
+  });
+  const state = loadState(storage, 'A');
+  assert.deepStrictEqual(state.todayWords, []);
 });
 
 test('buildQueue excludes seen words and respects remaining daily cap', () => {

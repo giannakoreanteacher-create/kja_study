@@ -7,7 +7,7 @@ function todayString(date = new Date()) {
 }
 
 function defaultState() {
-  return { seenIds: [], wrongIds: [], today: todayString(), todayCount: 0 };
+  return { seenIds: [], wrongIds: [], today: todayString(), todayCount: 0, todayWords: [] };
 }
 
 function loadState(storage, level) {
@@ -23,12 +23,13 @@ function loadState(storage, level) {
   if (!parsed || !Array.isArray(parsed.seenIds) || !Array.isArray(parsed.wrongIds)) {
     return defaultState();
   }
+  const todayWords = Array.isArray(parsed.todayWords) ? parsed.todayWords : [];
 
   const today = todayString();
   if (parsed.today !== today) {
-    return { seenIds: parsed.seenIds, wrongIds: parsed.wrongIds, today, todayCount: 0 };
+    return { seenIds: parsed.seenIds, wrongIds: parsed.wrongIds, today, todayCount: 0, todayWords: [] };
   }
-  return parsed;
+  return { ...parsed, todayWords };
 }
 
 function saveState(storage, level, state) {

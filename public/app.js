@@ -41,14 +41,25 @@
   })();
 
   const wordsByLevel = { A: [], B: [], C: [] };
-  WORDS.forEach((w) => wordsByLevel[w.level].push(w));
+  const wordsById = new Map();
+  WORDS.forEach((w) => {
+    wordsByLevel[w.level].push(w);
+    wordsById.set(w.id, w);
+  });
 
   let currentLevel = null;
   let queue = [];
   let queueIndex = 0;
   let sessionStartCount = 0;
-  const sessionResultsByLevel = { A: [], B: [], C: [] };
   let reviewQueue = [];
+
+  // Today's studied words are persisted in each level's localStorage state
+  // (state.todayWords), so they survive page reloads, not just level switches.
+  function getTodayWords(levelKey) {
+    return loadState(storage, levelKey).todayWords
+      .map(({ id, knows }) => ({ word: wordsById.get(id), knows }))
+      .filter((entry) => entry.word);
+  }
 
   function show(screenId) {
     document.querySelectorAll('.screen').forEach((el) => { el.hidden = true; });
@@ -68,7 +79,7 @@
   }
 
   function todayWordCount() {
-    return LEVELS.reduce((sum, { key }) => sum + sessionResultsByLevel[key].length, 0);
+    return LEVELS.reduce((sum, { key }) => sum + loadState(storage, key).todayWords.length, 0);
   }
 
   function renderSiteNav(active) {
@@ -98,7 +109,7 @@
   }
 
   function showTodaySummary() {
-    const all = LEVELS.flatMap(({ key }) => sessionResultsByLevel[key]);
+    const all = LEVELS.flatMap(({ key }) => getTodayWords(key));
     document.getElementById('complete-message').textContent = "Today's words";
     renderSessionSummary(all);
     document.getElementById('complete-more-btn').hidden = true;
@@ -140,7 +151,7 @@
     if (queue.length === 0) {
       showComplete(levelKey, allWordsSeen(levelKey, state)
         ? "You've learned every word in this level! 🎉"
-        : "You've reached today's limit of 30 words!", sessionResultsByLevel[levelKey]);
+        : "You've reached today's limit of 30 words!", getTodayWords(levelKey));
       return;
     }
     renderSiteNav(levelKey);
@@ -173,16 +184,17 @@
   function answerCurrent(knows) {
     const word = queue[queueIndex];
     let state = loadState(storage, currentLevel);
+    const todayWords = [...state.todayWords, { id: word.id, knows }];
     state = recordAnswer(state, word.id, knows);
+    state.todayWords = todayWords;
     saveState(storage, currentLevel, state);
-    sessionResultsByLevel[currentLevel].push({ word, knows });
 
     queueIndex += 1;
     if (queueIndex >= queue.length) {
       const finalState = loadState(storage, currentLevel);
       showComplete(currentLevel, allWordsSeen(currentLevel, finalState)
         ? "You've learned every word in this level! 🎉"
-        : "You've finished today's study session!", sessionResultsByLevel[currentLevel]);
+        : "You've finished today's study session!", getTodayWords(currentLevel));
       return;
     }
     renderStudyCard();
