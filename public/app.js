@@ -6,6 +6,23 @@
     { key: 'C', label: '3단계' },
   ];
   const DAILY_CAP = 30;
+  const POS_LABELS = {
+    명: 'Noun',
+    동: 'Verb',
+    형: 'Adjective',
+    부: 'Adverb',
+    의: 'Dependent Noun',
+    관: 'Determiner',
+    고: 'Proper Noun',
+    대: 'Pronoun',
+    수: 'Numeral',
+    감: 'Interjection',
+    보: 'Auxiliary',
+    불: 'Other',
+  };
+  function posLabel(pos) {
+    return POS_LABELS[pos] || pos;
+  }
   const storage = (() => {
     try {
       window.localStorage.setItem('__kja_probe', '1');
@@ -89,7 +106,7 @@
     card.classList.remove('flipped');
     const word = queue[queueIndex];
     document.getElementById('card-front-word').textContent = word.word;
-    document.getElementById('card-front-pos').textContent = `(${word.pos})`;
+    document.getElementById('card-front-pos').textContent = `(${posLabel(word.pos)})`;
     document.getElementById('card-front-emoji').textContent = word.emoji;
     document.getElementById('card-back-meaning').textContent = word.meaning;
   }
@@ -139,7 +156,7 @@
     card.classList.remove('flipped');
     const word = reviewQueue[reviewIndex];
     document.getElementById('review-card-front-word').textContent = word.word;
-    document.getElementById('review-card-front-pos').textContent = `(${word.pos})`;
+    document.getElementById('review-card-front-pos').textContent = `(${posLabel(word.pos)})`;
     document.getElementById('review-card-front-emoji').textContent = word.emoji;
     document.getElementById('review-card-back-meaning').textContent = word.meaning;
   }

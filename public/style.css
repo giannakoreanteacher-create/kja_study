@@ -109,7 +109,19 @@ h1 {
 .card-back { transform: rotateY(180deg); background: var(--pink-light); }
 
 .card-pos { font-size: 13px; color: #c2185b; margin-bottom: 12px; }
-.card-emoji { font-size: 48px; margin: 0 0 16px; line-height: 1; }
+.card-emoji {
+  width: 88px;
+  height: 88px;
+  margin: 0 0 20px;
+  border-radius: 50%;
+  background: var(--pink-light);
+  box-shadow: inset 0 0 0 1px rgba(255, 143, 171, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  line-height: 1;
+}
 .card-word { font-size: 30px; font-weight: 700; }
 .card-meaning { font-size: 20px; font-weight: 600; line-height: 1.5; }
 
