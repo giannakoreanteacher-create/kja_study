@@ -44,8 +44,7 @@ button:active { transform: scale(0.97); }
 .app {
   max-width: 1040px;
   margin: 0 auto;
-  padding: 32px 40px 80px;
-  min-height: 100vh;
+  padding: 32px 40px 40px;
 }
 
 .screen[hidden] { display: none; }
@@ -172,14 +171,14 @@ button:active { transform: scale(0.97); }
 .card-stage {
   display: flex;
   justify-content: center;
-  margin: 40px 0;
+  margin: 16px 0;
   perspective: 1200px;
 }
 
 .card {
   width: 100%;
   max-width: 380px;
-  height: 420px;
+  height: 360px;
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.35s ease;
