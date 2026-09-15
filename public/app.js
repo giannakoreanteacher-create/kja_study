@@ -1,9 +1,9 @@
 // public/app.js
 (function () {
   const LEVELS = [
-    { key: 'A', label: 'Level 1', illustration: '🌱' },
-    { key: 'B', label: 'Level 2', illustration: '🌿' },
-    { key: 'C', label: 'Level 3', illustration: '🌳' },
+    { key: 'A', label: 'Level 1', illustration: '🌱', cefr: 'Beginner · approx. CEFR A1–A2' },
+    { key: 'B', label: 'Level 2', illustration: '🌿', cefr: 'Intermediate · approx. CEFR B1–B2' },
+    { key: 'C', label: 'Level 3', illustration: '🌳', cefr: 'Advanced · approx. CEFR C1–C2' },
   ];
   const MONTH_NAMES = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -26,6 +26,9 @@
   };
   function posLabel(pos) {
     return POS_LABELS[pos] || pos;
+  }
+  function displayWord(word) {
+    return word.replace(/\d+$/, '');
   }
   const storage = (() => {
     try {
@@ -82,7 +85,7 @@
     renderHomeDate();
     const list = document.getElementById('level-list');
     list.innerHTML = '';
-    LEVELS.forEach(({ key, label, illustration }) => {
+    LEVELS.forEach(({ key, label, illustration, cefr }) => {
       const state = loadState(storage, key);
       const total = wordsByLevel[key].length;
 
@@ -91,6 +94,7 @@
       btn.innerHTML = `
         <div class="level-illustration">${illustration}</div>
         <div class="level-title">${label}</div>
+        <div class="level-cefr">${cefr}</div>
         <div class="level-progress">${state.todayCount}/${DAILY_CAP} today</div>
         <div class="level-total">${pad4(state.seenIds.length)}/${pad4(total)}</div>
       `;
@@ -108,8 +112,8 @@
     queueIndex = 0;
     if (queue.length === 0) {
       showComplete(levelKey, allWordsSeen(levelKey, state)
-        ? '이 단계의 모든 단어를 다 학습했어요! 🎉'
-        : '오늘의 학습 한도(30개)를 다 채웠어요!');
+        ? "You've learned every word in this level! 🎉"
+        : "You've reached today's limit of 30 words!");
       return;
     }
     show('screen-study');
@@ -124,7 +128,7 @@
     const card = document.getElementById('card');
     card.classList.remove('flipped');
     const word = queue[queueIndex];
-    document.getElementById('card-front-word').textContent = word.word;
+    document.getElementById('card-front-word').textContent = displayWord(word.word);
     document.getElementById('card-front-pos').textContent = `(${posLabel(word.pos)})`;
     document.getElementById('card-front-emoji').textContent = word.emoji;
     document.getElementById('card-back-meaning').textContent = word.meaning;
@@ -140,8 +144,8 @@
     if (queueIndex >= queue.length) {
       const finalState = loadState(storage, currentLevel);
       showComplete(currentLevel, allWordsSeen(currentLevel, finalState)
-        ? '이 단계의 모든 단어를 다 학습했어요! 🎉'
-        : '오늘 학습을 마쳤어요!');
+        ? "You've learned every word in this level! 🎉"
+        : "You've finished today's study session!");
       return;
     }
     renderStudyCard();
@@ -201,7 +205,7 @@
     `;
     item.querySelector('.review-pos').textContent = `(${posLabel(word.pos)})`;
     item.querySelector('.review-emoji').textContent = word.emoji;
-    item.querySelector('.review-word').textContent = word.word;
+    item.querySelector('.review-word').textContent = displayWord(word.word);
     item.querySelector('.review-meaning').textContent = word.meaning;
 
     const flipEl = item.querySelector('.review-flip');
