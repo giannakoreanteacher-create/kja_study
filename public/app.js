@@ -1,9 +1,13 @@
 // public/app.js
 (function () {
   const LEVELS = [
-    { key: 'A', label: '1단계' },
-    { key: 'B', label: '2단계' },
-    { key: 'C', label: '3단계' },
+    { key: 'A', label: 'Level 1' },
+    { key: 'B', label: 'Level 2' },
+    { key: 'C', label: 'Level 3' },
+  ];
+  const MONTH_NAMES = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
   ];
   const DAILY_CAP = 30;
   const POS_LABELS = {
@@ -57,7 +61,7 @@
 
   function renderHomeDate() {
     const [y, m, d] = todayString().split('-');
-    document.getElementById('home-date').textContent = `${y}년 ${Number(m)}월 ${Number(d)}일`;
+    document.getElementById('home-date').textContent = `${MONTH_NAMES[Number(m) - 1]} ${Number(d)}, ${y}`;
   }
 
   function renderHome() {
@@ -73,9 +77,9 @@
       btn.className = 'level-card';
       btn.innerHTML = `
         <div class="level-title">${label}</div>
-        <div class="level-progress">${state.todayCount}/${DAILY_CAP} 오늘 학습</div>
+        <div class="level-progress">${state.todayCount}/${DAILY_CAP} today</div>
         <div class="level-total">${pad4(state.seenIds.length)}/${pad4(total)}</div>
-        ${wrongCount > 0 ? `<button class="review-btn" data-level="${key}">복습하기 (${wrongCount}개)</button>` : ''}
+        ${wrongCount > 0 ? `<button class="review-btn" data-level="${key}">Review (${wrongCount})</button>` : ''}
       `;
       btn.addEventListener('click', (e) => {
         if (e.target.classList.contains('review-btn')) return; // handled below
