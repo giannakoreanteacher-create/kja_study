@@ -7,6 +7,7 @@ const words = source.map((w, i) => ({
   word: w.word,
   pos: w.pos,
   meaning: w.meaning,
+  emoji: w.emoji,
   level: w.level,
 }));
 

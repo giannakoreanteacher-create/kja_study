@@ -20,6 +20,7 @@ test('build-words-js produces a valid public/words.js', () => {
     assert.ok(!seenIds.has(w.id), `duplicate id ${w.id}`);
     seenIds.add(w.id);
     assert.ok(w.meaning && w.meaning.length > 0, `word ${w.word} missing meaning`);
+    assert.ok(w.emoji && w.emoji.length > 0, `word ${w.word} missing emoji`);
     counts[w.level] += 1;
   });
   assert.deepStrictEqual(counts, { A: 982, B: 2111, C: 2872 });

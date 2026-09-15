@@ -90,6 +90,7 @@
     const word = queue[queueIndex];
     document.getElementById('card-front-word').textContent = word.word;
     document.getElementById('card-front-pos').textContent = `(${word.pos})`;
+    document.getElementById('card-front-emoji').textContent = word.emoji;
     document.getElementById('card-back-meaning').textContent = word.meaning;
   }
 
@@ -139,6 +140,7 @@
     const word = reviewQueue[reviewIndex];
     document.getElementById('review-card-front-word').textContent = word.word;
     document.getElementById('review-card-front-pos').textContent = `(${word.pos})`;
+    document.getElementById('review-card-front-emoji').textContent = word.emoji;
     document.getElementById('review-card-back-meaning').textContent = word.meaning;
   }
 
