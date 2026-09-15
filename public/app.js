@@ -5,10 +5,6 @@
     { key: 'B', label: 'Level 2', illustration: '🌿', cefr: 'Intermediate · approx. CEFR B1–B2' },
     { key: 'C', label: 'Level 3', illustration: '🌳', cefr: 'Advanced · approx. CEFR C1–C2' },
   ];
-  const MONTH_NAMES = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ];
   const DAILY_CAP = 30;
   const POS_LABELS = {
     명: 'Noun',
@@ -61,11 +57,6 @@
     return String(n).padStart(4, '0');
   }
 
-  function renderHomeDate() {
-    const [y, m, d] = todayString().split('-');
-    document.getElementById('home-date').textContent = `${MONTH_NAMES[Number(m) - 1]} ${Number(d)}, ${y}`;
-  }
-
   function totalWrongCount() {
     return LEVELS.reduce((sum, { key }) => sum + loadState(storage, key).wrongIds.length, 0);
   }
@@ -82,7 +73,6 @@
   }
 
   function renderHome() {
-    renderHomeDate();
     const list = document.getElementById('level-list');
     list.innerHTML = '';
     LEVELS.forEach(({ key, label, illustration, cefr }) => {

@@ -51,18 +51,6 @@ h1 {
 
 .step-emoji { font-size: 24px; line-height: 1; }
 
-.how-to-note {
-  font-size: 13px;
-  color: #8a8a8a;
-  margin: 0 0 20px;
-}
-
-.home-date {
-  font-size: 14px;
-  color: #8a8a8a;
-  margin: 0 0 24px;
-}
-
 .level-list {
   display: flex;
   flex-direction: row;
@@ -104,11 +92,11 @@ h1 {
 }
 
 .review-all-card {
-  margin-top: 20px;
+  margin-bottom: 20px;
   display: block;
   width: 100%;
-  background: white;
-  color: #c2185b;
+  background: var(--pink);
+  color: white;
   border: none;
   border-radius: 20px;
   padding: 18px;
