@@ -51,18 +51,30 @@
     document.getElementById(screenId).hidden = false;
   }
 
+  function pad4(n) {
+    return String(n).padStart(4, '0');
+  }
+
+  function renderHomeDate() {
+    const [y, m, d] = todayString().split('-');
+    document.getElementById('home-date').textContent = `${y}년 ${Number(m)}월 ${Number(d)}일`;
+  }
+
   function renderHome() {
+    renderHomeDate();
     const list = document.getElementById('level-list');
     list.innerHTML = '';
     LEVELS.forEach(({ key, label }) => {
       const state = loadState(storage, key);
       const wrongCount = state.wrongIds.length;
+      const total = wordsByLevel[key].length;
 
       const btn = document.createElement('button');
       btn.className = 'level-card';
       btn.innerHTML = `
         <div class="level-title">${label}</div>
         <div class="level-progress">${state.todayCount}/${DAILY_CAP} 오늘 학습</div>
+        <div class="level-total">${pad4(state.seenIds.length)}/${pad4(total)}</div>
         ${wrongCount > 0 ? `<button class="review-btn" data-level="${key}">복습하기 (${wrongCount}개)</button>` : ''}
       `;
       btn.addEventListener('click', (e) => {

@@ -27,7 +27,13 @@ body {
 h1 {
   font-size: 22px;
   font-weight: 700;
-  margin-bottom: 24px;
+  margin-bottom: 4px;
+}
+
+.home-date {
+  font-size: 14px;
+  color: #8a8a8a;
+  margin: 0 0 24px;
 }
 
 .level-list {
@@ -48,6 +54,12 @@ h1 {
 
 .level-card .level-title { font-size: 18px; font-weight: 700; }
 .level-card .level-progress { font-size: 13px; color: #8a8a8a; margin-top: 6px; }
+.level-card .level-total {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: #c2185b;
+  margin-top: 4px;
+}
 
 .review-btn {
   margin-top: 10px;
