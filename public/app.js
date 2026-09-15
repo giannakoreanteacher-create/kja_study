@@ -61,6 +61,29 @@
     return LEVELS.reduce((sum, { key }) => sum + loadState(storage, key).wrongIds.length, 0);
   }
 
+  function renderTopNav(containerId, { includeReview, activeLevel }) {
+    const container = document.getElementById(containerId);
+    const count = totalWrongCount();
+    let html = `<button class="nav-btn" data-action="home">🏠 Home</button>`;
+    if (includeReview) {
+      html += `<button class="nav-btn" data-action="review">📚 Review${count > 0 ? ` (${count})` : ''}</button>`;
+    }
+    LEVELS.forEach(({ key, label }) => {
+      const active = key === activeLevel ? ' active' : '';
+      html += `<button class="nav-btn level-nav${active}" data-action="level" data-level="${key}">${label}</button>`;
+    });
+    container.innerHTML = html;
+
+    container.querySelectorAll('.nav-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        if (action === 'home') renderHome();
+        else if (action === 'review') startReview();
+        else if (action === 'level') startStudy(btn.dataset.level);
+      });
+    });
+  }
+
   function renderReviewAllSection() {
     const section = document.getElementById('review-all-section');
     const count = totalWrongCount();
@@ -106,6 +129,7 @@
         : "You've reached today's limit of 30 words!");
       return;
     }
+    renderTopNav('study-nav', { includeReview: true, activeLevel: levelKey });
     show('screen-study');
     renderStudyCard();
   }
@@ -162,6 +186,7 @@
       renderHome();
       return;
     }
+    renderTopNav('review-nav', { includeReview: false, activeLevel: null });
     show('screen-review');
     renderReviewGallery();
   }
@@ -233,8 +258,6 @@
   document.getElementById('swipe-know').addEventListener('click', () => answerCurrent(true));
   document.getElementById('swipe-dont-know').addEventListener('click', () => answerCurrent(false));
 
-  document.getElementById('study-back-btn').addEventListener('click', renderHome);
-  document.getElementById('review-back-btn').addEventListener('click', renderHome);
   document.getElementById('complete-home-btn').addEventListener('click', renderHome);
   document.getElementById('complete-review-btn').addEventListener('click', () => startReview());
 

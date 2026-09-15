@@ -106,13 +106,28 @@ h1 {
   cursor: pointer;
 }
 
-.back-btn {
-  background: none;
+.top-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.nav-btn {
+  background: white;
+  color: var(--ink);
   border: none;
-  color: #8a8a8a;
-  font-size: 14px;
-  padding: 8px 0;
+  border-radius: 14px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--shadow);
   cursor: pointer;
+}
+
+.nav-btn.level-nav.active {
+  background: var(--pink);
+  color: white;
 }
 
 .card-stage {
