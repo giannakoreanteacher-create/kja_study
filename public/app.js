@@ -18,7 +18,7 @@
     수: 'Numeral',
     감: 'Interjection',
     보: 'Auxiliary',
-    불: 'Other',
+    불: 'Unclassified',
   };
   function posLabel(pos) {
     return POS_LABELS[pos] || pos;
@@ -46,11 +46,17 @@
   let currentLevel = null;
   let queue = [];
   let queueIndex = 0;
+  let sessionStartCount = 0;
+  let sessionResults = [];
   let reviewQueue = [];
 
   function show(screenId) {
     document.querySelectorAll('.screen').forEach((el) => { el.hidden = true; });
     document.getElementById(screenId).hidden = false;
+  }
+
+  function pad2(n) {
+    return String(n).padStart(2, '0');
   }
 
   function pad4(n) {
@@ -61,13 +67,11 @@
     return LEVELS.reduce((sum, { key }) => sum + loadState(storage, key).wrongIds.length, 0);
   }
 
-  function renderTopNav(containerId, { includeReview, activeLevel }) {
-    const container = document.getElementById(containerId);
+  function renderSiteNav(activeLevel) {
+    const container = document.getElementById('site-nav');
     const count = totalWrongCount();
     let html = `<button class="nav-btn" data-action="home">🏠 Home</button>`;
-    if (includeReview) {
-      html += `<button class="nav-btn" data-action="review">📚 Review${count > 0 ? ` (${count})` : ''}</button>`;
-    }
+    html += `<button class="nav-btn review-nav-btn" data-action="review">📚 Review${count > 0 ? ` (${count})` : ''}</button>`;
     LEVELS.forEach(({ key, label }) => {
       const active = key === activeLevel ? ' active' : '';
       html += `<button class="nav-btn level-nav${active}" data-action="level" data-level="${key}">${label}</button>`;
@@ -84,18 +88,8 @@
     });
   }
 
-  function renderReviewAllSection() {
-    const section = document.getElementById('review-all-section');
-    const count = totalWrongCount();
-    if (count === 0) {
-      section.innerHTML = '';
-      return;
-    }
-    section.innerHTML = `<button id="review-all-btn" class="review-all-card">📚 Review All (${count})</button>`;
-    document.getElementById('review-all-btn').addEventListener('click', startReview);
-  }
-
   function renderHome() {
+    renderSiteNav(null);
     const list = document.getElementById('level-list');
     list.innerHTML = '';
     LEVELS.forEach(({ key, label, illustration, cefr }) => {
@@ -114,28 +108,37 @@
       btn.addEventListener('click', () => startStudy(key));
       list.appendChild(btn);
     });
-    renderReviewAllSection();
     show('screen-home');
   }
 
-  function startStudy(levelKey) {
+  function startStudy(levelKey, extend) {
     currentLevel = levelKey;
     const state = loadState(storage, levelKey);
-    queue = buildQueue(wordsByLevel[levelKey], state, DAILY_CAP);
+    const cap = extend ? state.todayCount + DAILY_CAP : DAILY_CAP;
+    queue = buildQueue(wordsByLevel[levelKey], state, cap);
     queueIndex = 0;
+    sessionStartCount = state.todayCount;
+    sessionResults = [];
     if (queue.length === 0) {
       showComplete(levelKey, allWordsSeen(levelKey, state)
         ? "You've learned every word in this level! 🎉"
-        : "You've reached today's limit of 30 words!");
+        : "You've reached today's limit of 30 words!", []);
       return;
     }
-    renderTopNav('study-nav', { includeReview: true, activeLevel: levelKey });
+    renderSiteNav(levelKey);
     show('screen-study');
     renderStudyCard();
   }
 
   function allWordsSeen(levelKey, state) {
     return state.seenIds.length >= wordsByLevel[levelKey].length;
+  }
+
+  function renderStudyProgress() {
+    const current = Math.min(sessionStartCount + queueIndex, DAILY_CAP);
+    const pct = Math.min(100, (current / DAILY_CAP) * 100);
+    document.getElementById('study-progress-bar').style.width = `${pct}%`;
+    document.getElementById('study-progress-text').textContent = `${pad2(current)}/${DAILY_CAP}`;
   }
 
   function renderStudyCard() {
@@ -146,6 +149,7 @@
     document.getElementById('card-front-pos').textContent = `(${posLabel(word.pos)})`;
     document.getElementById('card-front-emoji').textContent = word.emoji;
     document.getElementById('card-back-meaning').textContent = word.meaning;
+    renderStudyProgress();
   }
 
   function answerCurrent(knows) {
@@ -153,23 +157,49 @@
     let state = loadState(storage, currentLevel);
     state = recordAnswer(state, word.id, knows);
     saveState(storage, currentLevel, state);
+    sessionResults.push({ word, knows });
 
     queueIndex += 1;
     if (queueIndex >= queue.length) {
       const finalState = loadState(storage, currentLevel);
       showComplete(currentLevel, allWordsSeen(currentLevel, finalState)
         ? "You've learned every word in this level! 🎉"
-        : "You've finished today's study session!");
+        : "You've finished today's study session!", sessionResults);
       return;
     }
     renderStudyCard();
   }
 
-  function showComplete(levelKey, message) {
+  function renderSessionSummary(results) {
+    const container = document.getElementById('complete-summary');
+    if (!results || results.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+    container.innerHTML = results.map(({ word, knows }) => `
+      <div class="summary-row">
+        <span class="summary-check ${knows ? 'know' : 'dont-know'}">${knows ? '✓' : '✗'}</span>
+        <span class="summary-emoji">${word.emoji}</span>
+        <span class="summary-word">${displayWord(word.word)}</span>
+        <span class="summary-pos">(${posLabel(word.pos)})</span>
+        <span class="summary-meaning">${word.meaning}</span>
+      </div>
+    `).join('');
+  }
+
+  function showComplete(levelKey, message, results) {
     currentLevel = levelKey;
+    renderSiteNav(null);
     document.getElementById('complete-message').textContent = message;
+    renderSessionSummary(results);
+
+    const state = loadState(storage, levelKey);
+    const moreBtn = document.getElementById('complete-more-btn');
+    moreBtn.hidden = !(results && results.length > 0 && !allWordsSeen(levelKey, state));
+
     const reviewBtn = document.getElementById('complete-review-btn');
     reviewBtn.hidden = totalWrongCount() === 0;
+
     show('screen-complete');
   }
 
@@ -186,7 +216,7 @@
       renderHome();
       return;
     }
-    renderTopNav('review-nav', { includeReview: false, activeLevel: null });
+    renderSiteNav(null);
     show('screen-review');
     renderReviewGallery();
   }
@@ -248,9 +278,7 @@
     reviewQueue = reviewQueue.filter((w) => w.id !== word.id);
     itemEl.remove();
     if (reviewQueue.length === 0) {
-      document.getElementById('complete-message').textContent = 'Review complete!';
-      document.getElementById('complete-review-btn').hidden = true;
-      show('screen-complete');
+      showComplete(currentLevel, 'Review complete!', []);
     }
   }
 
@@ -259,6 +287,7 @@
   document.getElementById('swipe-dont-know').addEventListener('click', () => answerCurrent(false));
 
   document.getElementById('complete-home-btn').addEventListener('click', renderHome);
+  document.getElementById('complete-more-btn').addEventListener('click', () => startStudy(currentLevel, true));
   document.getElementById('complete-review-btn').addEventListener('click', () => startReview());
 
   // --- tap-to-flip + drag-to-swipe, unified (pointer events cover mouse + touch) ---

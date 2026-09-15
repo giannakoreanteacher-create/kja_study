@@ -7,21 +7,27 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <header class="site-header">
+    <div class="site-title">📖 Korean Vocabulary Cards</div>
+    <nav id="site-nav" class="top-nav"></nav>
+  </header>
+
   <main class="app">
     <section id="screen-home" class="screen">
-      <h1>Korean Vocabulary Cards</h1>
       <div class="how-to">
         <div class="how-to-step"><span class="step-emoji">🎯</span><span><b>Step 1.</b> Pick a level — up to 30 new words a day</span></div>
         <div class="how-to-step"><span class="step-emoji">🔄</span><span><b>Step 2.</b> Tap the card to reveal the meaning</span></div>
         <div class="how-to-step"><span class="step-emoji">👍</span><span><b>Step 3.</b> Mark Know or Don't Know</span></div>
-        <div class="how-to-step"><span class="step-emoji">📚</span><span><b>Step 4.</b> Words marked Don't Know are saved — tap Review All anytime</span></div>
+        <div class="how-to-step"><span class="step-emoji">📚</span><span><b>Step 4.</b> Words marked Don't Know are saved — tap Review anytime</span></div>
       </div>
-      <div id="review-all-section"></div>
       <div id="level-list" class="level-list"></div>
     </section>
 
     <section id="screen-study" class="screen" hidden>
-      <div id="study-nav" class="top-nav"></div>
+      <div class="study-progress-row">
+        <div class="study-progress-track"><div id="study-progress-bar" class="study-progress-bar"></div></div>
+        <span id="study-progress-text" class="study-progress-text"></span>
+      </div>
       <div class="card-stage">
         <div id="card" class="card">
           <div class="card-face card-front">
@@ -42,14 +48,15 @@
 
     <section id="screen-complete" class="screen" hidden>
       <p id="complete-message" class="complete-message"></p>
+      <div id="complete-summary" class="session-summary"></div>
       <div class="complete-actions">
-        <button id="complete-review-btn" class="primary-btn" hidden>Review</button>
         <button id="complete-home-btn" class="primary-btn">Home</button>
+        <button id="complete-more-btn" class="primary-btn" hidden>Study More</button>
+        <button id="complete-review-btn" class="primary-btn" hidden>Review</button>
       </div>
     </section>
 
     <section id="screen-review" class="screen" hidden>
-      <div id="review-nav" class="top-nav"></div>
       <div id="review-gallery" class="review-gallery"></div>
     </section>
   </main>
