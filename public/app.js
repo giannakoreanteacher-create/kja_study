@@ -71,18 +71,18 @@
     return LEVELS.reduce((sum, { key }) => sum + sessionResultsByLevel[key].length, 0);
   }
 
-  function renderSiteNav(activeLevel) {
+  function renderSiteNav(active) {
     const container = document.getElementById('site-nav');
     const count = totalWrongCount();
     const todayCount = todayWordCount();
-    let html = `<button class="nav-btn" data-action="home">🏠 Home</button>`;
+    const cls = (name) => `nav-btn${active === name ? ' active' : ''}`;
+    let html = `<button class="${cls('home')}" data-action="home">🏠 Home</button>`;
     if (todayCount > 0) {
-      html += `<button class="nav-btn" data-action="today">📝 Today's Words (${todayCount})</button>`;
+      html += `<button class="${cls('today')}" data-action="today">📝 Today's Words (${todayCount})</button>`;
     }
-    html += `<button class="nav-btn review-nav-btn" data-action="review">📚 Review${count > 0 ? ` (${count})` : ''}</button>`;
+    html += `<button class="${cls('review')}" data-action="review">📚 Review${count > 0 ? ` (${count})` : ''}</button>`;
     LEVELS.forEach(({ key, label }) => {
-      const active = key === activeLevel ? ' active' : '';
-      html += `<button class="nav-btn level-nav${active}" data-action="level" data-level="${key}">${label}</button>`;
+      html += `<button class="${cls(key)}" data-action="level" data-level="${key}">${label}</button>`;
     });
     container.innerHTML = html;
 
@@ -103,12 +103,12 @@
     renderSessionSummary(all);
     document.getElementById('complete-more-btn').hidden = true;
     document.getElementById('complete-review-btn').hidden = totalWrongCount() === 0;
-    renderSiteNav(null);
+    renderSiteNav('today');
     show('screen-complete');
   }
 
   function renderHome() {
-    renderSiteNav(null);
+    renderSiteNav('home');
     const list = document.getElementById('level-list');
     list.innerHTML = '';
     LEVELS.forEach(({ key, label, illustration, cefr }) => {
@@ -234,7 +234,7 @@
       renderHome();
       return;
     }
-    renderSiteNav(null);
+    renderSiteNav('review');
     show('screen-review');
     renderReviewGallery();
   }

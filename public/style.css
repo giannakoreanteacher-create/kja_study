@@ -61,7 +61,7 @@ button:active { transform: scale(0.97); }
   display: flex;
   align-items: center;
   gap: 12px;
-  background: white;
+  background: var(--pink-light);
   border-radius: 16px;
   padding: 16px 18px;
   box-shadow: var(--shadow);
@@ -128,12 +128,7 @@ button:active { transform: scale(0.97); }
   cursor: pointer;
 }
 
-.nav-btn.review-nav-btn {
-  background: var(--pink);
-  color: white;
-}
-
-.nav-btn.level-nav.active {
+.nav-btn.active {
   background: var(--pink);
   color: white;
 }
