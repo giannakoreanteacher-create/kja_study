@@ -10,7 +10,11 @@
   <main class="app">
     <section id="screen-home" class="screen">
       <h1>Korean Vocabulary Cards</h1>
-      <p class="intro">Flip each card to learn a Korean word's English meaning, then swipe to mark what you know. Pick a level below to start.</p>
+      <div class="how-to">
+        <div class="how-to-step"><span class="step-emoji">🎯</span><span><b>Step 1.</b> Pick a level</span></div>
+        <div class="how-to-step"><span class="step-emoji">🔄</span><span><b>Step 2.</b> Tap the card to reveal the meaning</span></div>
+        <div class="how-to-step"><span class="step-emoji">👍</span><span><b>Step 3.</b> Mark Know or Don't Know</span></div>
+      </div>
       <p id="home-date" class="home-date"></p>
       <div id="level-list" class="level-list"></div>
     </section>
@@ -45,22 +49,7 @@
 
     <section id="screen-review" class="screen" hidden>
       <button class="back-btn" id="review-back-btn">← 홈</button>
-      <div class="card-stage">
-        <div id="review-card" class="card">
-          <div class="card-face card-front">
-            <p id="review-card-front-pos" class="card-pos"></p>
-            <p id="review-card-front-emoji" class="card-emoji"></p>
-            <p id="review-card-front-word" class="card-word"></p>
-          </div>
-          <div class="card-face card-back">
-            <p id="review-card-back-meaning" class="card-meaning"></p>
-          </div>
-        </div>
-      </div>
-      <div class="swipe-row">
-        <button id="review-swipe-dont-know" class="swipe-btn dont-know">← Don't Know</button>
-        <button id="review-swipe-know" class="swipe-btn know">Know →</button>
-      </div>
+      <div id="review-gallery" class="review-gallery"></div>
     </section>
   </main>
 

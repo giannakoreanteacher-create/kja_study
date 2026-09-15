@@ -1,9 +1,9 @@
 // public/app.js
 (function () {
   const LEVELS = [
-    { key: 'A', label: 'Level 1' },
-    { key: 'B', label: 'Level 2' },
-    { key: 'C', label: 'Level 3' },
+    { key: 'A', label: 'Level 1', illustration: '🌱' },
+    { key: 'B', label: 'Level 2', illustration: '🌿' },
+    { key: 'C', label: 'Level 3', illustration: '🌳' },
   ];
   const MONTH_NAMES = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -48,7 +48,6 @@
   let queue = [];
   let queueIndex = 0;
   let reviewQueue = [];
-  let reviewIndex = 0;
 
   function show(screenId) {
     document.querySelectorAll('.screen').forEach((el) => { el.hidden = true; });
@@ -68,7 +67,7 @@
     renderHomeDate();
     const list = document.getElementById('level-list');
     list.innerHTML = '';
-    LEVELS.forEach(({ key, label }) => {
+    LEVELS.forEach(({ key, label, illustration }) => {
       const state = loadState(storage, key);
       const wrongCount = state.wrongIds.length;
       const total = wordsByLevel[key].length;
@@ -76,6 +75,7 @@
       const btn = document.createElement('button');
       btn.className = 'level-card';
       btn.innerHTML = `
+        <div class="level-illustration">${illustration}</div>
         <div class="level-title">${label}</div>
         <div class="level-progress">${state.todayCount}/${DAILY_CAP} today</div>
         <div class="level-total">${pad4(state.seenIds.length)}/${pad4(total)}</div>
@@ -153,52 +153,86 @@
     show('screen-complete');
   }
 
+  // --- review: gallery of flip-cards, each with its own Know/Don't Know buttons ---
   function startReview(levelKey) {
     currentLevel = levelKey;
     const state = loadState(storage, levelKey);
     const wrongSet = new Set(state.wrongIds);
     reviewQueue = wordsByLevel[levelKey].filter((w) => wrongSet.has(w.id));
-    reviewIndex = 0;
     if (reviewQueue.length === 0) {
       renderHome();
       return;
     }
     show('screen-review');
-    renderReviewCard();
+    renderReviewGallery();
   }
 
-  function renderReviewCard() {
-    const card = document.getElementById('review-card');
-    card.classList.remove('flipped');
-    const word = reviewQueue[reviewIndex];
-    document.getElementById('review-card-front-word').textContent = word.word;
-    document.getElementById('review-card-front-pos').textContent = `(${posLabel(word.pos)})`;
-    document.getElementById('review-card-front-emoji').textContent = word.emoji;
-    document.getElementById('review-card-back-meaning').textContent = word.meaning;
+  function renderReviewGallery() {
+    const gallery = document.getElementById('review-gallery');
+    gallery.innerHTML = '';
+    reviewQueue.forEach((word) => {
+      gallery.appendChild(buildReviewItem(word));
+    });
   }
 
-  function answerReviewCurrent(knows) {
-    const word = reviewQueue[reviewIndex];
+  function buildReviewItem(word) {
+    const item = document.createElement('div');
+    item.className = 'review-item';
+    item.innerHTML = `
+      <div class="review-flip">
+        <div class="review-face review-front">
+          <p class="review-pos"></p>
+          <p class="review-emoji"></p>
+          <p class="review-word"></p>
+        </div>
+        <div class="review-face review-back">
+          <p class="review-meaning"></p>
+        </div>
+      </div>
+      <div class="review-actions">
+        <button class="mini-btn dont-know" type="button">✗ Don't Know</button>
+        <button class="mini-btn know" type="button">✓ Know</button>
+      </div>
+    `;
+    item.querySelector('.review-pos').textContent = `(${posLabel(word.pos)})`;
+    item.querySelector('.review-emoji').textContent = word.emoji;
+    item.querySelector('.review-word').textContent = word.word;
+    item.querySelector('.review-meaning').textContent = word.meaning;
+
+    const flipEl = item.querySelector('.review-flip');
+    flipEl.addEventListener('click', () => flipEl.classList.toggle('flipped'));
+
+    item.querySelector('.mini-btn.know').addEventListener('click', (e) => {
+      e.stopPropagation();
+      answerReviewItem(word.id, true, item);
+    });
+    item.querySelector('.mini-btn.dont-know').addEventListener('click', (e) => {
+      e.stopPropagation();
+      answerReviewItem(word.id, false, item);
+    });
+
+    return item;
+  }
+
+  function answerReviewItem(wordId, knows, itemEl) {
     let state = loadState(storage, currentLevel);
-    state = recordAnswer(state, word.id, knows);
+    state = recordAnswer(state, wordId, knows);
     saveState(storage, currentLevel, state);
 
-    reviewIndex += 1;
-    if (reviewIndex >= reviewQueue.length) {
-      document.getElementById('complete-message').textContent = '복습 완료!';
-      const finalState = loadState(storage, currentLevel);
-      document.getElementById('complete-review-btn').hidden = finalState.wrongIds.length === 0;
+    if (!knows) return; // stays in the gallery, still in wrongIds
+
+    reviewQueue = reviewQueue.filter((w) => w.id !== wordId);
+    itemEl.remove();
+    if (reviewQueue.length === 0) {
+      document.getElementById('complete-message').textContent = 'Review complete!';
+      document.getElementById('complete-review-btn').hidden = true;
       show('screen-complete');
-      return;
     }
-    renderReviewCard();
   }
 
   // --- wiring ---
   document.getElementById('swipe-know').addEventListener('click', () => answerCurrent(true));
   document.getElementById('swipe-dont-know').addEventListener('click', () => answerCurrent(false));
-  document.getElementById('review-swipe-know').addEventListener('click', () => answerReviewCurrent(true));
-  document.getElementById('review-swipe-dont-know').addEventListener('click', () => answerReviewCurrent(false));
 
   document.getElementById('study-back-btn').addEventListener('click', renderHome);
   document.getElementById('review-back-btn').addEventListener('click', renderHome);
@@ -230,7 +264,6 @@
     });
   }
   enableSwipeCard('card', () => answerCurrent(true), () => answerCurrent(false));
-  enableSwipeCard('review-card', () => answerReviewCurrent(true), () => answerReviewCurrent(false));
 
   renderHome();
 })();
